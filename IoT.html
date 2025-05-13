@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IoT Weather Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1e1e2f;
+      color: #fff;
+      text-align: center;
+      padding-top: 60px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+    }
+
+    .box {
+      background: #2e2e3f;
+      padding: 30px;
+      border-radius: 15px;
+      width: 420px;
+      margin: 20px auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .data {
+      font-size: 2rem;
+      margin-top: 20px;
+    }
+
+    .note {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .note.hot { background-color: #ff5733; }
+    .note.comfy { background-color: #28a745; }
+    .note.humid { background-color: #007bff; }
+
+    .logo {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">☀️</div>
+  <h1>IoT Weather Station</h1>
+  <div class="box">
+    <div class="data" id="temp">🌡️ Temperature: -- °C</div>
+    <div class="data" id="hum">💧 Humidity: -- %</div>
+    <div class="note" id="note">Fetching data...</div>
+  </div>
+
+  <script>
+    async function fetchData() {
+      try {
+        const res = await fetch("http://192.168.22.53:8081/");
+        const data = await res.json();
+        const temp = data.temperature.toFixed(1);
+        const hum = data.humidity.toFixed(1);
+
+        document.getElementById("temp").textContent = "🌡️ Temperature: " + temp + " °C";
+        document.getElementById("hum").textContent = "💧 Humidity: " + hum + " %";
+
+        const note = document.getElementById("note");
+
+        if (temp > 30) {
+          note.textContent = "🔥 It's hot today! Stay hydrated.";
+          note.className = "note hot";
+        } else if (hum > 70) {
+          note.textContent = "💦 High humidity detected. It might feel sticky.";
+          note.className = "note humid";
+        } else {
+          note.textContent = "✅ Weather looks comfortable!";
+          note.className = "note comfy";
+        }
+
+      } catch (e) {
+        console.error("Fetch failed", e);
+        document.getElementById("note").textContent = "⚠️ Could not fetch data.";
+        document.getElementById("note").className = "note";
+      }
+    }
+
+    setInterval(fetchData, 3000);
+    fetchData();
+  </script>
+</body>
+</html>
